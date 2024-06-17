@@ -8,6 +8,8 @@ namespace MySite.API.Routes;
 
 public static class LikedTweetsRoutes
 {
+    private const string TwitterUrl = "https://twitter.com";
+
     public static void MapLikedTweetsRoutes(this IEndpointRouteBuilder app)
     {
         app.MapPost("/likedtweets", async (LikedTweetsDto dto, MySiteDbContext dbContext) =>
@@ -32,7 +34,7 @@ public static class LikedTweetsRoutes
                 .AsNoTracking()
                 .Select(x => new LikedTweetDto
                 {
-                    TweetLink = x.TweetLink,
+                    TweetLink = $"{TwitterUrl}{x.TweetLink}",
                     ScreenshotPath = x.ScreenshotPath,
                     LikedDate = x.LikedDate
                 })
@@ -43,14 +45,14 @@ public static class LikedTweetsRoutes
         
         app.MapGet("/likedtweets/{dateString}", async (string dateString, MySiteDbContext dbContext) =>
         {
-            if (!DateTime.TryParseExact(dateString, "%d-%m-%Y", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date)) return null;
+            if (!DateTime.TryParse(dateString, out var date)) return null;
             
             return await dbContext.LikedTweets
                 .AsNoTracking()
                 .Where(x => x.LikedDate == date)
                 .Select(x => new LikedTweetDto
                 {
-                    TweetLink = x.TweetLink,
+                    TweetLink = $"{TwitterUrl}{x.TweetLink}",
                     ScreenshotPath = x.ScreenshotPath,
                     LikedDate = x.LikedDate
                 })
