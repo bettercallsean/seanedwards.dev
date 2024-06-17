@@ -1,0 +1,19 @@
+services:
+  mysite:
+    container_name: mysite
+    image: 192.168.1.75:9298/mysite
+    depends_on:
+      - mysiteapi
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    restart: always
+
+  mysiteapi:
+    container_name: mysite-api
+    image: 192.168.1.75:9298/mysite-api
+    ports:
+      - "57890:8080"
+      - "57891:8081"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    restart: always
