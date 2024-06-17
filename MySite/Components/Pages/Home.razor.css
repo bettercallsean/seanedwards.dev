@@ -1,0 +1,23 @@
+a#dissertation-link{
+    color: rgb(0, 153, 255);
+}
+
+a#dissertation-link:hover{
+    color: rgb(103, 199, 255);
+}
+
+.aboutme {
+    padding-top: 2%;
+}
+
+.mugshot {
+    border-radius: 100%;
+    width: auto;
+}
+
+.description {
+    padding-top: 4%;
+    font-size: 20px;
+    color: rgb(77, 77, 77);
+    margin-bottom: 2%;
+}
