@@ -1,4 +1,6 @@
-﻿using MySite.API.Data;
+﻿using System.Globalization;
+using Microsoft.EntityFrameworkCore;
+using MySite.API.Data;
 using MySite.API.Data.Dtos;
 using MySite.API.Data.Entities;
 
@@ -10,22 +12,51 @@ public static class LikedTweetsRoutes
     {
         app.MapPost("/likedtweets", async (LikedTweetsDto dto, MySiteDbContext dbContext) =>
         {
-            var tweets = new List<LikedTweet>();
-            foreach (var item in dto.Tweets)
+            var tweets = dto.Tweets.Select(item => new LikedTweet
             {
-                tweets.Add(new LikedTweet
-                {
-                    TweetLink = item.Key,
-                    ScreenshotPath = item.Value,
-                    LikedDate = DateTime.Today
-                });
-            }
+                TweetLink = item.Key, 
+                ScreenshotPath = item.Value, 
+                LikedDate = DateTime.Today
+            }).ToList();
 
             await dbContext.LikedTweets.AddRangeAsync(tweets);
 
             return await dbContext.SaveChangesAsync() > 0;
         })
         .WithName("AddLikedTweets")
+        .WithOpenApi();
+        
+        app.MapGet("/likedtweets", async (MySiteDbContext dbContext) =>
+        {
+            return await dbContext.LikedTweets
+                .AsNoTracking()
+                .Select(x => new LikedTweetDto
+                {
+                    TweetLink = x.TweetLink,
+                    ScreenshotPath = x.ScreenshotPath,
+                    LikedDate = x.LikedDate
+                })
+                .ToListAsync();
+        })
+        .WithName("GetAllLikedTweets")
+        .WithOpenApi();
+        
+        app.MapGet("/likedtweets/{dateString}", async (string dateString, MySiteDbContext dbContext) =>
+        {
+            if (!DateTime.TryParseExact(dateString, "%d-%m-%Y", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date)) return null;
+            
+            return await dbContext.LikedTweets
+                .AsNoTracking()
+                .Where(x => x.LikedDate == date)
+                .Select(x => new LikedTweetDto
+                {
+                    TweetLink = x.TweetLink,
+                    ScreenshotPath = x.ScreenshotPath,
+                    LikedDate = x.LikedDate
+                })
+                .ToListAsync();
+        })
+        .WithName("GetLikedTweetsOnDate")
         .WithOpenApi();
     }
 }
