@@ -1,8 +1,8 @@
-﻿using System.Globalization;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using MySite.API.Data;
-using MySite.API.Data.Dtos;
 using MySite.API.Data.Entities;
+using MySite.Shared.Dtos;
+using MySite.Shared.RouteParameters;
 
 namespace MySite.API.Routes;
 
@@ -17,7 +17,7 @@ public static class LikedTweetsRoutes
             var tweets = dto.Tweets.Select(item => new LikedTweet
             {
                 TweetLink = item.Key, 
-                ScreenshotPath = item.Value, 
+                Screenshot = item.Value, 
                 LikedDate = DateTime.Today
             }).ToList();
 
@@ -28,14 +28,17 @@ public static class LikedTweetsRoutes
         .WithName("AddLikedTweets")
         .WithOpenApi();
         
-        app.MapGet("/likedtweets", async (MySiteDbContext dbContext) =>
+        app.MapGet("/likedtweets", async ([AsParameters] LikedTweetsParameters parameters, MySiteDbContext dbContext) =>
         {
             return await dbContext.LikedTweets
                 .AsNoTracking()
+                .OrderByDescending(x => x.LikedDate)
+                .Skip((parameters.PageNumber - 1) * parameters.PageSize)
+                .Take(parameters.PageSize)
                 .Select(x => new LikedTweetDto
                 {
                     TweetLink = $"{TwitterUrl}{x.TweetLink}",
-                    ScreenshotPath = x.ScreenshotPath,
+                    Screenshot = x.Screenshot,
                     LikedDate = x.LikedDate
                 })
                 .ToListAsync();
@@ -53,12 +56,27 @@ public static class LikedTweetsRoutes
                 .Select(x => new LikedTweetDto
                 {
                     TweetLink = $"{TwitterUrl}{x.TweetLink}",
-                    ScreenshotPath = x.ScreenshotPath,
+                    Screenshot = x.Screenshot,
                     LikedDate = x.LikedDate
                 })
                 .ToListAsync();
         })
         .WithName("GetLikedTweetsOnDate")
         .WithOpenApi();
+        
+        app.MapGet("/likedtweets/earliest", async (MySiteDbContext dbContext) =>
+            {
+                return await dbContext.LikedTweets
+                    .AsNoTracking()
+                    .Select(x => new LikedTweetDto
+                    {
+                        TweetLink = $"{TwitterUrl}{x.TweetLink}",
+                        Screenshot = x.Screenshot,
+                        LikedDate = x.LikedDate
+                    })
+                    .FirstOrDefaultAsync();
+            })
+            .WithName("GetEarliestLikedTweet")
+            .WithOpenApi();
     }
 }
