@@ -7,8 +7,6 @@
 @inject IMapper mapper
 @inject NavigationManager navigationManager
 @inject ILogger<LikedTweets> logger
-@implements IDisposable
-@inject PersistentComponentState ApplicationState
 @rendermode InteractiveServer
 
 @if (Loading)
@@ -24,24 +22,25 @@ else
     else
     {
         <div class="container">
-            <div class="row date-navigator">
-                <button class="btn btn-primary col-sm" @onclick="() => NavigateToTweetDate(TweetsDate.AddDays(1))" style="visibility: @(TweetsDate != DateTime.Today ? "visible" : "hidden")">
-                    @(TweetsDate == DateTime.Today.AddDays(-1)
+            <div class="row align-items-center date-navigator">
+                <a class="btn btn-primary col-sm" href="/likedtweets/@TweetsDate.Date.AddDays(1).ToString("dd-MM-yyyy")" style="visibility: @(TweetsDate != DateTime.Today ? "visible" : "hidden")">
+                        @(TweetsDate == DateTime.Today.AddDays(-1)
                         ? "Today"
                         : TweetsDate.Date.AddDays(1).ToString(TweetsDate.Year == DateTime.Today.Year
-                            ? "dddd d MMMM"
-                            : "dddd d MMMM yyyy"))
-                </button>
+                        ? "dddd d MMMM"
+                        : "dddd d MMMM yyyy"))
+                </a>
+  
+                <h3 class="col">@PageTitle</h3>
                 
-                <h3 class="col-sm">@PageTitle</h3>
-            
-                <button class="btn btn-primary col-sm" @onclick="() => NavigateToTweetDate(TweetsDate.AddDays(-1))" style="visibility: @(EarliestTweet is not null && EarliestTweet.LikedDate != TweetsDate ? "visible" : "hidden")">
-                    @(TweetsDate == DateTime.Today
-                            ? "Yesterday"
-                            : TweetsDate.Date.AddDays(-1).ToString(TweetsDate.Year == DateTime.Today.Year
-                                ? "dddd d MMMM"
-                                : "dddd d MMMM yyyy"))
-                </button>
+                <a class="btn btn-primary col-sm" href="/likedtweets/@TweetsDate.Date.AddDays(-1).ToString("dd-MM-yyyy")" style="visibility: @(EarliestTweet is not null && EarliestTweet.LikedDate != TweetsDate ? "visible" : "hidden")">
+                        @(TweetsDate == DateTime.Today
+                        ? "Yesterday"
+                        : TweetsDate.Date.AddDays(-1).ToString(TweetsDate.Year == DateTime.Today.Year
+                        ? "dddd d MMMM"
+                        : "dddd d MMMM yyyy"))
+                </a>
+               
             </div>
             @if (Tweets?.Count > 0)
             {
@@ -67,20 +66,11 @@ else
 
 
 @code {
-    private PersistingComponentStateSubscription _subscription;
-    private List<LikedTweet>? _tweets;
-
     [Parameter]
     public string? Date { get; set; }
     
     private DateTime TweetsDate { get; set; }
-
-    private List<LikedTweet>? Tweets
-    {
-        get => _tweets;
-        set => _tweets = value;
-    }
-
+    private List<LikedTweet>? Tweets { get; set; }
     private bool Loading { get; set; }
     private string? PageTitle { get; set; }
     private bool DateIsInTheFuture { get; set; }
@@ -90,8 +80,6 @@ else
     {
         Loading = true;
         
-        _subscription = ApplicationState.RegisterOnPersisting(Persist);
-
         var validDate = DateTime.TryParseExact(Date, "dd-MM-yyyy", CultureInfo.GetCultureInfo("en-GB"), DateTimeStyles.None, out var tweetDate);
 
         if (validDate)
@@ -112,35 +100,17 @@ else
         }
         
         SetPageTitle();
+        await Task.Delay(1);
+
         await Task.Run(LoadLikedTweetsAsync);
         await Task.Run(GetEarliestTweetAsync);
         
         if(EarliestTweet?.LikedDate > TweetsDate)
             navigationManager.NavigateTo($"/likedtweets/{DateTime.Today:dd-MM-yyyy}");
-
-        await Task.Delay(1);
         
         Loading = false;
     }
     
-    protected override async Task OnParametersSetAsync()
-    {
-        // check if data is present in the persistent storage
-        if (!ApplicationState.TryTakeFromJson<List<LikedTweet>?>("tweets", out _tweets))
-        {
-            // if data is not store then fetch it like normally
-            await LoadLikedTweetsAsync();
-        }
-    }
-    
-    private Task Persist()
-    {
-        // storing the data
-        ApplicationState.PersistAsJson("tweets", Tweets);
-        ApplicationState.PersistAsJson("earliestTweet", EarliestTweet);
-        return Task.CompletedTask;
-    }
-
     private void SetPageTitle()
     {
         if (TweetsDate == DateTime.Today)
@@ -163,14 +133,11 @@ else
     {
         if (Tweets == null || Tweets.Count == 0)
         {
-            logger.LogInformation("Loading liked tweets for {Date:d}", TweetsDate);
-
             var tweets = await tweetService.GetLikedTweetsAsync(TweetsDate);
             logger.LogInformation("{Count} results returned from API", tweets?.Count);
         
             Tweets = mapper.Map<List<LikedTweet>>(tweets);
         }
-
     }
 
     private async Task GetEarliestTweetAsync()
@@ -186,10 +153,4 @@ else
     {
         navigationManager.NavigateTo($"/likedtweets/{tweetsDate:dd-MM-yyyy}");
     }
-
-    public void Dispose()
-    {
-        _subscription.Dispose();
-    }
-
 }
