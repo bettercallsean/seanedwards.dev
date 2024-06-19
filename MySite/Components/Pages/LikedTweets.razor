@@ -30,9 +30,9 @@ else
                         ? "dddd d MMMM"
                         : "dddd d MMMM yyyy"))
                 </a>
-  
+
                 <h3 class="col">@PageTitle</h3>
-                
+
                 <a class="btn btn-primary col-sm" href="/likedtweets/@TweetsDate.Date.AddDays(-1).ToString("dd-MM-yyyy")" style="visibility: @(EarliestTweet is not null && EarliestTweet.LikedDate != TweetsDate ? "visible" : "hidden")">
                         @(TweetsDate == DateTime.Today
                         ? "Yesterday"
@@ -40,11 +40,12 @@ else
                         ? "dddd d MMMM"
                         : "dddd d MMMM yyyy"))
                 </a>
-               
+
             </div>
             @if (Tweets?.Count > 0)
             {
-                foreach (var tweet in Tweets)
+                <div class="d-flex flex-column align-items-center">
+                @foreach (var tweet in Tweets)
                 {
                     <div class="tweet">
                         <a href="@tweet.TweetLink" target="_blank">
@@ -55,6 +56,7 @@ else
                         </a>
                     </div>
                 }
+                </div>
             }
             else
             {
@@ -68,7 +70,7 @@ else
 @code {
     [Parameter]
     public string? Date { get; set; }
-    
+
     private DateTime TweetsDate { get; set; }
     private List<LikedTweet>? Tweets { get; set; }
     private bool Loading { get; set; }
@@ -79,8 +81,8 @@ else
     protected override async Task OnInitializedAsync()
     {
         Loading = true;
-        
-        var validDate = DateTime.TryParseExact(Date, "dd-MM-yyyy", CultureInfo.GetCultureInfo("en-GB"), DateTimeStyles.None, out var tweetDate);
+
+        var validDate = DateTime.TryParseExact(Date, "dd-MM-yyyy", CultureInfo.CurrentCulture, DateTimeStyles.None, out var tweetDate);
 
         if (validDate)
         {
@@ -98,19 +100,19 @@ else
             logger.LogInformation("Invalid date entered {Date}", Date);
             navigationManager.NavigateTo($"/likedtweets/{DateTime.Today:dd-MM-yyyy}");
         }
-        
+
         SetPageTitle();
         await Task.Delay(1);
 
         await Task.Run(LoadLikedTweetsAsync);
         await Task.Run(GetEarliestTweetAsync);
-        
+
         if(EarliestTweet?.LikedDate > TweetsDate)
             navigationManager.NavigateTo($"/likedtweets/{DateTime.Today:dd-MM-yyyy}");
-        
+
         Loading = false;
     }
-    
+
     private void SetPageTitle()
     {
         if (TweetsDate == DateTime.Today)
@@ -123,8 +125,8 @@ else
         }
         else
         {
-            PageTitle = TweetsDate.ToString(TweetsDate.Year == DateTime.Today.Year 
-                ? "dddd d MMMM" 
+            PageTitle = TweetsDate.ToString(TweetsDate.Year == DateTime.Today.Year
+                ? "dddd d MMMM"
                 : "dddd d MMMM yyyy");
         }
     }
@@ -135,7 +137,7 @@ else
         {
             var tweets = await tweetService.GetLikedTweetsAsync(TweetsDate);
             logger.LogInformation("{Count} results returned from API", tweets?.Count);
-        
+
             Tweets = mapper.Map<List<LikedTweet>>(tweets);
         }
     }
