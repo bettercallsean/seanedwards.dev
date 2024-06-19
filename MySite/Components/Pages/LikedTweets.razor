@@ -1,4 +1,5 @@
-﻿@page "/likedtweets/{date}"
+﻿@page "/likedtweets"
+@page "/likedtweets/{date}"
 @using System.Globalization
 @using global::AutoMapper
 @using MySite.Models
@@ -82,33 +83,44 @@ else
     {
         Loading = true;
 
-        var validDate = DateTime.TryParseExact(Date, "dd-MM-yyyy", CultureInfo.CurrentCulture, DateTimeStyles.None, out var tweetDate);
+        await Task.Delay(1);
 
-        if (validDate)
+        await Task.Run(GetEarliestTweetAsync);
+
+        if(Date is not null)
         {
-            TweetsDate = tweetDate;
+            var validDate = DateTime.TryParseExact(Date, "dd-MM-yyyy", CultureInfo.CurrentCulture, DateTimeStyles.None, out var tweetDate);
 
-            if (tweetDate > DateTime.Today)
+            if (validDate)
             {
-                DateIsInTheFuture = true;
-                Loading = false;
-                return;
+                TweetsDate = tweetDate;
+
+                if(EarliestTweet?.LikedDate > TweetsDate)
+                    NavigateToToday();
+
+                if (tweetDate > DateTime.Today)
+                {
+                    DateIsInTheFuture = true;
+                    Loading = false;
+                    return;
+                }
+            }
+            else
+            {
+                logger.LogInformation("Invalid date entered {Date}", Date);
+                NavigateToToday();
             }
         }
         else
         {
-            logger.LogInformation("Invalid date entered {Date}", Date);
-            navigationManager.NavigateTo($"/likedtweets/{DateTime.Today:dd-MM-yyyy}");
+            TweetsDate = DateTime.Today;
+            Date = DateTime.Today.ToString("dd-MM-yyyy");
         }
 
+
         SetPageTitle();
-        await Task.Delay(1);
 
         await Task.Run(LoadLikedTweetsAsync);
-        await Task.Run(GetEarliestTweetAsync);
-
-        if(EarliestTweet?.LikedDate > TweetsDate)
-            navigationManager.NavigateTo($"/likedtweets/{DateTime.Today:dd-MM-yyyy}");
 
         Loading = false;
     }
@@ -154,5 +166,10 @@ else
     private void NavigateToTweetDate(DateTime tweetsDate)
     {
         navigationManager.NavigateTo($"/likedtweets/{tweetsDate:dd-MM-yyyy}");
+    }
+
+    private void NavigateToToday()
+    {
+        navigationManager.NavigateTo($"/likedtweets/{DateTime.Today:dd-MM-yyyy}");
     }
 }
