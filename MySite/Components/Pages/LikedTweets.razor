@@ -108,12 +108,16 @@ else
         else
         {
             logger.LogInformation("Invalid date entered {Date}", Date);
-            navigationManager.NavigateTo("/");
+            navigationManager.NavigateTo($"/likedtweets/{DateTime.Today:dd-MM-yyyy}");
         }
         
         SetPageTitle();
         await Task.Run(LoadLikedTweetsAsync);
         await Task.Run(GetEarliestTweetAsync);
+        
+        if(EarliestTweet?.LikedDate > TweetsDate)
+            navigationManager.NavigateTo($"/likedtweets/{DateTime.Today:dd-MM-yyyy}");
+
         await Task.Delay(1);
         
         Loading = false;
@@ -185,7 +189,7 @@ else
 
     public void Dispose()
     {
-        // TODO release managed resources here
+        _subscription.Dispose();
     }
 
 }
