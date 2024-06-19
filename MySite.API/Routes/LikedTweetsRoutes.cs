@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Globalization;
+using Microsoft.EntityFrameworkCore;
 using MySite.API.Data;
 using MySite.API.Data.Entities;
 using MySite.Shared.Dtos;
@@ -48,7 +49,7 @@ public static class LikedTweetsRoutes
         
         app.MapGet("/likedtweets/{dateString}", async (string dateString, MySiteDbContext dbContext) =>
         {
-            if (!DateTime.TryParse(dateString, out var date)) return null;
+            if (!DateTime.TryParseExact(dateString, "dd-MM-yyyy", CultureInfo.GetCultureInfo("en-GB"), DateTimeStyles.None, out var date)) return null;
             
             return await dbContext.LikedTweets
                 .AsNoTracking()
