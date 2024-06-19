@@ -17,10 +17,13 @@ public static class LikedTweetsRoutes
         {
             var tweets = dto.Tweets.Select(item => new LikedTweet
             {
-                TweetLink = item.Key, 
-                Screenshot = item.Value, 
+                TweetLink = item.Key,
+                Screenshot = item.Value,
                 LikedDate = DateTime.Today
-            }).ToList();
+            })
+            .ToList();
+
+            tweets.Reverse();
 
             await dbContext.LikedTweets.AddRangeAsync(tweets);
 
@@ -28,7 +31,7 @@ public static class LikedTweetsRoutes
         })
         .WithName("AddLikedTweets")
         .WithOpenApi();
-        
+
         app.MapGet("/likedtweets", async ([AsParameters] LikedTweetsParameters parameters, MySiteDbContext dbContext) =>
         {
             return await dbContext.LikedTweets
@@ -46,12 +49,12 @@ public static class LikedTweetsRoutes
         })
         .WithName("GetAllLikedTweets")
         .WithOpenApi();
-        
+
         app.MapGet("/likedtweets/{dateString}", async (string dateString, MySiteDbContext dbContext) =>
         {
-            if (!DateTime.TryParseExact(dateString, "dd-MM-yyyy", CultureInfo.GetCultureInfo("en-GB"), DateTimeStyles.None, out var date)) return null;
-            
-            return await dbContext.LikedTweets
+            if (!DateTime.TryParseExact(dateString, "dd-MM-yyyy", CultureInfo.CurrentCulture, DateTimeStyles.None, out var date)) return null;
+
+            var tweets = await dbContext.LikedTweets
                 .AsNoTracking()
                 .Where(x => x.LikedDate == date)
                 .Select(x => new LikedTweetDto
@@ -61,11 +64,15 @@ public static class LikedTweetsRoutes
                     LikedDate = x.LikedDate
                 })
                 .ToListAsync();
+
+            tweets.Reverse();
+
+            return tweets;
         })
         .WithName("GetLikedTweetsOnDate")
         .WithOpenApi()
-        .CacheOutput(x => x.Expire(new TimeSpan(0, 30,0)));
-        
+        .CacheOutput(x => x.Expire(new TimeSpan(0, 30, 0)));
+
         app.MapGet("/likedtweets/earliest", async (MySiteDbContext dbContext) =>
         {
             return await dbContext.LikedTweets
@@ -80,21 +87,21 @@ public static class LikedTweetsRoutes
         })
         .WithName("GetEarliestLikedTweet")
         .WithOpenApi()
-        .CacheOutput(x => x.Expire(new TimeSpan(0, 30,0)));
-        
+        .CacheOutput(x => x.Expire(new TimeSpan(0, 30, 0)));
+
         app.MapPut("/likedtweets/{id:int}", async (int id, LikedTweetDto likedTweetDto, MySiteDbContext dbContext) =>
             {
                 var likedTweet = await dbContext.LikedTweets
                     .FirstOrDefaultAsync(x => x.Id == id);
 
                 if (likedTweet is null) return false;
-                
+
                 if (likedTweetDto.LikedDate is not null)
                     likedTweet.LikedDate = likedTweetDto.LikedDate.Value;
-                
+
                 if (likedTweetDto.Screenshot is not null)
                     likedTweet.Screenshot = likedTweetDto.Screenshot;
-                
+
                 if (likedTweetDto.TweetLink is not null)
                     likedTweet.TweetLink = likedTweetDto.TweetLink;
 
