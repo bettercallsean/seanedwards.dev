@@ -1,0 +1,13 @@
+img {
+    max-width: 750px;
+    height: auto;
+    width: 100%;
+}
+
+.tweet {
+    overflow-wrap: anywhere;
+}
+
+.date-navigator {
+    margin-bottom: 1rem;
+}

@@ -18,7 +18,7 @@ main {
 
 #bottom-hr {
     width: 70%;
-    margin: auto;
+    margin: auto auto 10px;
 }
 
 .sidebar {

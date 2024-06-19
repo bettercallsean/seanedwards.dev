@@ -1,0 +1,11 @@
+<div class="container">
+    <h3>Sorry, I haven't got a time machine :(</h3>
+    <h3>Come back @(DaysUntilDate == 1 ? "tomorrow" : $"in {DaysUntilDate} days") to see what I've liked!</h3>
+</div>
+
+@code {
+    [Parameter]
+    public DateTime FutureDate { get; set; }
+
+    private int DaysUntilDate => (FutureDate.Date - DateTime.Now.Date).Days;
+}

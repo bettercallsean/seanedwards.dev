@@ -1,1 +1,191 @@
-﻿@page "/likedtweets"
+﻿@page "/likedtweets/{date}"
+@using System.Globalization
+@using global::AutoMapper
+@using MySite.Models
+@using MySite.Services
+@inject ITweetService tweetService
+@inject IMapper mapper
+@inject NavigationManager navigationManager
+@inject ILogger<LikedTweets> logger
+@implements IDisposable
+@inject PersistentComponentState ApplicationState
+@rendermode InteractiveServer
+
+@if (Loading)
+{
+    <SpinKitThreeBounce />
+}
+else
+{
+    if (DateIsInTheFuture)
+    {
+        <FutureTweets FutureDate="@TweetsDate"/>
+    }
+    else
+    {
+        <div class="container">
+            <div class="row date-navigator">
+                <button class="btn btn-primary col-sm" @onclick="() => NavigateToTweetDate(TweetsDate.AddDays(1))" style="visibility: @(TweetsDate != DateTime.Today ? "visible" : "hidden")">
+                    @(TweetsDate == DateTime.Today.AddDays(-1)
+                        ? "Today"
+                        : TweetsDate.Date.AddDays(1).ToString(TweetsDate.Year == DateTime.Today.Year
+                            ? "dddd d MMMM"
+                            : "dddd d MMMM yyyy"))
+                </button>
+                
+                <h3 class="col-sm">@PageTitle</h3>
+            
+                <button class="btn btn-primary col-sm" @onclick="() => NavigateToTweetDate(TweetsDate.AddDays(-1))" style="visibility: @(EarliestTweet is not null && EarliestTweet.LikedDate != TweetsDate ? "visible" : "hidden")">
+                    @(TweetsDate == DateTime.Today
+                            ? "Yesterday"
+                            : TweetsDate.Date.AddDays(-1).ToString(TweetsDate.Year == DateTime.Today.Year
+                                ? "dddd d MMMM"
+                                : "dddd d MMMM yyyy"))
+                </button>
+            </div>
+            @if (Tweets?.Count > 0)
+            {
+                foreach (var tweet in Tweets)
+                {
+                    <div class="tweet">
+                        <a href="@tweet.TweetLink" target="_blank">
+                            <img src="@tweet.Base64TweetScreenshot"/>
+                        </a>
+                        <a href="@tweet.TweetLink" target="_blank">
+                            <p>@tweet.TweetLink</p>
+                        </a>
+                    </div>
+                }
+            }
+            else
+            {
+                <h3>No tweets for today!</h3>
+            }
+        </div>
+    }
+}
+
+
+@code {
+    private PersistingComponentStateSubscription _subscription;
+    private List<LikedTweet>? _tweets;
+
+    [Parameter]
+    public string? Date { get; set; }
+    
+    private DateTime TweetsDate { get; set; }
+
+    private List<LikedTweet>? Tweets
+    {
+        get => _tweets;
+        set => _tweets = value;
+    }
+
+    private bool Loading { get; set; }
+    private string? PageTitle { get; set; }
+    private bool DateIsInTheFuture { get; set; }
+    private static LikedTweet? EarliestTweet { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Loading = true;
+        
+        _subscription = ApplicationState.RegisterOnPersisting(Persist);
+
+        var validDate = DateTime.TryParseExact(Date, "dd-MM-yyyy", CultureInfo.GetCultureInfo("en-GB"), DateTimeStyles.None, out var tweetDate);
+
+        if (validDate)
+        {
+            TweetsDate = tweetDate;
+
+            if (tweetDate > DateTime.Today)
+            {
+                DateIsInTheFuture = true;
+                Loading = false;
+                return;
+            }
+        }
+        else
+        {
+            logger.LogInformation("Invalid date entered {Date}", Date);
+            navigationManager.NavigateTo("/");
+        }
+        
+        SetPageTitle();
+        await Task.Run(LoadLikedTweetsAsync);
+        await Task.Run(GetEarliestTweetAsync);
+        await Task.Delay(1);
+        
+        Loading = false;
+    }
+    
+    protected override async Task OnParametersSetAsync()
+    {
+        // check if data is present in the persistent storage
+        if (!ApplicationState.TryTakeFromJson<List<LikedTweet>?>("tweets", out _tweets))
+        {
+            // if data is not store then fetch it like normally
+            await LoadLikedTweetsAsync();
+        }
+    }
+    
+    private Task Persist()
+    {
+        // storing the data
+        ApplicationState.PersistAsJson("tweets", Tweets);
+        ApplicationState.PersistAsJson("earliestTweet", EarliestTweet);
+        return Task.CompletedTask;
+    }
+
+    private void SetPageTitle()
+    {
+        if (TweetsDate == DateTime.Today)
+        {
+            PageTitle = "Today";
+        }
+        else if (TweetsDate == DateTime.Today.AddDays(-1))
+        {
+            PageTitle = "Yesterday";
+        }
+        else
+        {
+            PageTitle = TweetsDate.ToString(TweetsDate.Year == DateTime.Today.Year 
+                ? "dddd d MMMM" 
+                : "dddd d MMMM yyyy");
+        }
+    }
+
+    private async Task LoadLikedTweetsAsync()
+    {
+        if (Tweets == null || Tweets.Count == 0)
+        {
+            logger.LogInformation("Loading liked tweets for {Date:d}", TweetsDate);
+
+            var tweets = await tweetService.GetLikedTweetsAsync(TweetsDate);
+            logger.LogInformation("{Count} results returned from API", tweets?.Count);
+        
+            Tweets = mapper.Map<List<LikedTweet>>(tweets);
+        }
+
+    }
+
+    private async Task GetEarliestTweetAsync()
+    {
+        if (EarliestTweet == null)
+        {
+            var earliestTweet = await tweetService.GetEarliestLikedTweetAsync();
+            EarliestTweet = mapper.Map<LikedTweet>(earliestTweet);
+        }
+    }
+
+    private void NavigateToTweetDate(DateTime tweetsDate)
+    {
+        navigationManager.NavigateTo($"/likedtweets/{tweetsDate:dd-MM-yyyy}");
+    }
+
+    public void Dispose()
+    {
+        // TODO release managed resources here
+    }
+
+}
