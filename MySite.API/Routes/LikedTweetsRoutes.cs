@@ -66,18 +66,39 @@ public static class LikedTweetsRoutes
         .WithOpenApi();
         
         app.MapGet("/likedtweets/earliest", async (MySiteDbContext dbContext) =>
+        {
+            return await dbContext.LikedTweets
+                .AsNoTracking()
+                .Select(x => new LikedTweetDto
+                {
+                    TweetLink = $"{TwitterUrl}{x.TweetLink}",
+                    Screenshot = x.Screenshot,
+                    LikedDate = x.LikedDate
+                })
+                .FirstOrDefaultAsync();
+        })
+        .WithName("GetEarliestLikedTweet")
+        .WithOpenApi();
+        
+        app.MapPut("/likedtweets/{id:int}", async (int id, LikedTweetDto likedTweetDto, MySiteDbContext dbContext) =>
             {
-                return await dbContext.LikedTweets
-                    .AsNoTracking()
-                    .Select(x => new LikedTweetDto
-                    {
-                        TweetLink = $"{TwitterUrl}{x.TweetLink}",
-                        Screenshot = x.Screenshot,
-                        LikedDate = x.LikedDate
-                    })
-                    .FirstOrDefaultAsync();
+                var likedTweet = await dbContext.LikedTweets
+                    .FirstOrDefaultAsync(x => x.Id == id);
+
+                if (likedTweet is null) return false;
+                
+                if (likedTweetDto.LikedDate is not null)
+                    likedTweet.LikedDate = likedTweetDto.LikedDate.Value;
+                
+                if (likedTweetDto.Screenshot is not null)
+                    likedTweet.Screenshot = likedTweetDto.Screenshot;
+                
+                if (likedTweetDto.TweetLink is not null)
+                    likedTweet.TweetLink = likedTweetDto.TweetLink;
+
+                return await dbContext.SaveChangesAsync() > 0;
             })
-            .WithName("GetEarliestLikedTweet")
+            .WithName("UpdateLikedTweet")
             .WithOpenApi();
     }
 }
