@@ -63,7 +63,8 @@ public static class LikedTweetsRoutes
                 .ToListAsync();
         })
         .WithName("GetLikedTweetsOnDate")
-        .WithOpenApi();
+        .WithOpenApi()
+        .CacheOutput(x => x.Expire(new TimeSpan(0, 30,0)));
         
         app.MapGet("/likedtweets/earliest", async (MySiteDbContext dbContext) =>
         {
@@ -78,7 +79,8 @@ public static class LikedTweetsRoutes
                 .FirstOrDefaultAsync();
         })
         .WithName("GetEarliestLikedTweet")
-        .WithOpenApi();
+        .WithOpenApi()
+        .CacheOutput(x => x.Expire(new TimeSpan(0, 30,0)));
         
         app.MapPut("/likedtweets/{id:int}", async (int id, LikedTweetDto likedTweetDto, MySiteDbContext dbContext) =>
             {
