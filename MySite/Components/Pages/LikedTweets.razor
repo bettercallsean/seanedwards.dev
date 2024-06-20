@@ -61,7 +61,14 @@ else
             }
             else
             {
-                <h3>No tweets for today!</h3>
+                if (TweetsDate == DateTime.Today)
+                {
+                    <h3>No liked tweets yet!</h3>
+                }
+                else
+                {
+                    <h3>No liked tweets for today!</h3>
+                }
             }
         </div>
     }
