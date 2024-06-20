@@ -1,4 +1,4 @@
-using Microsoft.Extensions.FileProviders;
+using Microsoft.AspNetCore.HttpLogging;
 using MySite.AutoMapper;
 using MySite.Components;
 using MySite.Services;
@@ -22,7 +22,14 @@ builder.Services.AddAutoMapper(config =>
     config.AddProfile<LikedTweetProfile>();
 });
 
+builder.Services.AddHttpLogging(config =>
+{
+    config.CombineLogs = true;
+});
+
 var app = builder.Build();
+
+app.UseHttpLogging();
 
 app.UseStaticFiles();
 
