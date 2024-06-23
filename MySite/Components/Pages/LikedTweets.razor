@@ -8,11 +8,10 @@
 @inject IMapper mapper
 @inject NavigationManager navigationManager
 @inject ILogger<LikedTweets> logger
-@rendermode InteractiveServer
 
 @if (Loading)
 {
-    <SpinKitThreeBounce />
+    <Loading IsLoading="true" />
 }
 else
 {
@@ -28,8 +27,8 @@ else
                         @(TweetsDate == DateTime.Today.AddDays(-1)
                         ? "Today"
                         : TweetsDate.Date.AddDays(1).ToString(TweetsDate.Year == DateTime.Today.Year
-                        ? "dddd d MMMM"
-                        : "dddd d MMMM yyyy"))
+                            ? "dddd d MMMM"
+                            : "dddd d MMMM yyyy"))
                 </a>
 
                 <h3 class="col">@PageTitle</h3>
@@ -38,8 +37,8 @@ else
                         @(TweetsDate == DateTime.Today
                         ? "Yesterday"
                         : TweetsDate.Date.AddDays(-1).ToString(TweetsDate.Year == DateTime.Today.Year
-                        ? "dddd d MMMM"
-                        : "dddd d MMMM yyyy"))
+                            ? "dddd d MMMM"
+                            : "dddd d MMMM yyyy"))
                 </a>
 
             </div>
