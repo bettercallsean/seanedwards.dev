@@ -19,7 +19,7 @@ public static class LikedTweetsRoutes
             {
                 TweetLink = item.Key,
                 Screenshot = item.Value,
-                LikedDate = DateTime.Today
+                LikedDate = dto.LikedDate
             })
             .ToList();
 
