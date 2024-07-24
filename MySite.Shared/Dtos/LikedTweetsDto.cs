@@ -3,5 +3,5 @@
 public record LikedTweetsDto
 {
     public DateTime LikedDate { get; set; }
-    public Dictionary<string, byte[]> Tweets { get; set; }
+    public Dictionary<string, string> Tweets { get; set; }
 }

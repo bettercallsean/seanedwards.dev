@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Data.Common;
+using System.Globalization;
 using Microsoft.EntityFrameworkCore;
 using MySite.API.Data;
 using MySite.API.Data.Entities;
@@ -18,7 +19,7 @@ public static class LikedTweetsRoutes
             var tweets = dto.Tweets.Select(item => new LikedTweet
             {
                 TweetLink = item.Key,
-                Screenshot = item.Value,
+                ScreenshotPath = item.Value,
                 LikedDate = dto.LikedDate
             })
             .ToList();
@@ -42,7 +43,7 @@ public static class LikedTweetsRoutes
                 .Select(x => new LikedTweetDto
                 {
                     TweetLink = $"{TwitterUrl}{x.TweetLink}",
-                    Screenshot = x.Screenshot,
+                    Screenshot = File.ReadAllBytes(x.ScreenshotPath),
                     LikedDate = x.LikedDate
                 })
                 .ToListAsync();
@@ -60,7 +61,7 @@ public static class LikedTweetsRoutes
                 .Select(x => new LikedTweetDto
                 {
                     TweetLink = $"{TwitterUrl}{x.TweetLink}",
-                    Screenshot = x.Screenshot,
+                    Screenshot = File.ReadAllBytes(x.ScreenshotPath),
                     LikedDate = x.LikedDate
                 })
                 .ToListAsync();
@@ -80,7 +81,7 @@ public static class LikedTweetsRoutes
                 .Select(x => new LikedTweetDto
                 {
                     TweetLink = $"{TwitterUrl}{x.TweetLink}",
-                    Screenshot = x.Screenshot,
+                    Screenshot = File.ReadAllBytes(x.ScreenshotPath),
                     LikedDate = x.LikedDate
                 })
                 .FirstOrDefaultAsync();
@@ -88,26 +89,5 @@ public static class LikedTweetsRoutes
         .WithName("GetEarliestLikedTweet")
         .WithOpenApi()
         .CacheOutput(x => x.Expire(new TimeSpan(0, 30, 0)));
-
-        app.MapPut("/likedtweets/{id:int}", async (int id, LikedTweetDto likedTweetDto, MySiteDbContext dbContext) =>
-            {
-                var likedTweet = await dbContext.LikedTweets
-                    .FirstOrDefaultAsync(x => x.Id == id);
-
-                if (likedTweet is null) return false;
-
-                if (likedTweetDto.LikedDate is not null)
-                    likedTweet.LikedDate = likedTweetDto.LikedDate.Value;
-
-                if (likedTweetDto.Screenshot is not null)
-                    likedTweet.Screenshot = likedTweetDto.Screenshot;
-
-                if (likedTweetDto.TweetLink is not null)
-                    likedTweet.TweetLink = likedTweetDto.TweetLink;
-
-                return await dbContext.SaveChangesAsync() > 0;
-            })
-            .WithName("UpdateLikedTweet")
-            .WithOpenApi();
     }
 }
