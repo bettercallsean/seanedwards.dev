@@ -32,7 +32,7 @@ public static class LikedTweetsRoutes
         .WithName("AddLikedTweets")
         .WithOpenApi();
 
-        app.MapGet("/likedtweets", async ([AsParameters] LikedTweetsParameters parameters, MySiteDbContext dbContext) =>
+        app.MapGet("/likedtweets", async ([AsParameters] GetAllParameters parameters, MySiteDbContext dbContext) =>
         {
             return await dbContext.LikedTweets
                 .AsNoTracking()
@@ -60,7 +60,7 @@ public static class LikedTweetsRoutes
                 .Select(x => new LikedTweetDto
                 {
                     TweetLink = $"{TwitterUrl}{x.TweetLink}",
-                    Screenshot = File.ReadAllBytes(x.ScreenshotPath),
+                    Screenshot = string.IsNullOrEmpty(x.ScreenshotPath) ? new byte[1] : File.ReadAllBytes(x.ScreenshotPath),
                     LikedDate = x.LikedDate
                 })
                 .ToListAsync();
@@ -77,10 +77,12 @@ public static class LikedTweetsRoutes
         {
             return await dbContext.LikedTweets
                 .AsNoTracking()
+                .OrderByDescending(x => x.LikedDate)
+                .ThenBy(x => x.Id)
                 .Select(x => new LikedTweetDto
                 {
                     TweetLink = $"{TwitterUrl}{x.TweetLink}",
-                    Screenshot = File.ReadAllBytes(x.ScreenshotPath),
+                    Screenshot = string.IsNullOrEmpty(x.ScreenshotPath) ? new byte[1] : File.ReadAllBytes(x.ScreenshotPath),
                     LikedDate = x.LikedDate
                 })
                 .FirstOrDefaultAsync();

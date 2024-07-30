@@ -11,6 +11,7 @@ builder.Configuration.AddJsonFile("appsettings.json")
     .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true);
 
 builder.Services.AddScoped<ITweetService, TweetService>();
+builder.Services.AddScoped<IBlogService, BlogService>();
 
 var apiEndpoint = builder.Configuration.GetValue<string>("APIEndpoint") ?? throw new Exception("APIEndpoint empty in appsettings");
 

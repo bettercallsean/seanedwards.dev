@@ -1,10 +1,10 @@
 namespace MySite.Shared.RouteParameters;
 
-public record LikedTweetsParameters
+public record GetAllParameters
 {
-    private const int MaxPageSize = 50;
+    private const int MaxPageSize = 15;
 
-    private int _pageSize = 10;
+    private int _pageSize = 5;
 
     public int PageNumber { get; set; } = 1;
 

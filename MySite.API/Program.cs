@@ -27,5 +27,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapLikedTweetsRoutes();
+app.MapBlogPostsRoutes();
 
 app.Run();
