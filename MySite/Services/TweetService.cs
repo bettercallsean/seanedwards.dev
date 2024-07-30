@@ -5,7 +5,7 @@ namespace MySite.Services;
 public class TweetService(HttpClient httpClient, ILogger<TweetService> logger) : ITweetService
 {
     private const string BaseUri = "/likedtweets";
-    
+
     public async Task<List<LikedTweetDto>?> GetLikedTweetsAsync()
     {
         logger.LogInformation("Getting all liked tweets");

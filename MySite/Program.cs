@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.HttpLogging;
 using MySite.AutoMapper;
 using MySite.Components;
 using MySite.Services;
@@ -12,9 +11,12 @@ builder.Configuration.AddJsonFile("appsettings.json")
     .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true);
 
 builder.Services.AddScoped<ITweetService, TweetService>();
+
+var apiEndpoint = builder.Configuration.GetValue<string>("APIEndpoint") ?? throw new Exception("APIEndpoint empty in appsettings");
+
 builder.Services.AddSingleton(x => new HttpClient
 {
-    BaseAddress = new Uri(builder.Configuration["APIEndpoint"])
+    BaseAddress = new Uri(apiEndpoint)
 });
 
 builder.Services.AddAutoMapper(config =>

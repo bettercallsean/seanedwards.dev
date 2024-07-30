@@ -93,29 +93,9 @@ else
 
         await Task.Run(GetEarliestTweetAsync);
 
-        if(Date is not null)
+        if (Date is not null)
         {
-            var validDate = DateTime.TryParseExact(Date, "dd-MM-yyyy", CultureInfo.CurrentCulture, DateTimeStyles.None, out var tweetDate);
-
-            if (validDate)
-            {
-                TweetsDate = tweetDate;
-
-                if(EarliestTweet?.LikedDate > TweetsDate)
-                    NavigateToToday();
-
-                if (tweetDate > DateTime.Today)
-                {
-                    DateIsInTheFuture = true;
-                    Loading = false;
-                    return;
-                }
-            }
-            else
-            {
-                logger.LogInformation("Invalid date entered {Date}", Date);
-                NavigateToToday();
-            }
+            ParseDateParameter();
         }
         else
         {
@@ -129,6 +109,31 @@ else
         await Task.Run(LoadLikedTweetsAsync);
 
         Loading = false;
+    }
+
+    private void ParseDateParameter()
+    {
+        var validDate = DateTime.TryParseExact(Date, "dd-MM-yyyy", CultureInfo.CurrentCulture, DateTimeStyles.None, out var tweetDate);
+
+        if (validDate)
+        {
+            TweetsDate = tweetDate;
+
+            if (EarliestTweet?.LikedDate > TweetsDate)
+                NavigateToToday();
+
+            if (tweetDate > DateTime.Today)
+            {
+                DateIsInTheFuture = true;
+                Loading = false;
+                return;
+            }
+        }
+        else
+        {
+            logger.LogInformation("Invalid date entered {Date}", Date);
+            NavigateToToday();
+        }
     }
 
     private void SetPageTitle()
