@@ -23,6 +23,7 @@
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="13.0.1" />
     <PackageReference Include="Faso.Blazor.SpinKit" Version="1.0.1" />
+    <PackageReference Include="Markdig" Version="0.37.0" />
   </ItemGroup>
 
 </Project>
