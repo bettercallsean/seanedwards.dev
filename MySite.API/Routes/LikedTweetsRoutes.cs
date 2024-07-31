@@ -1,5 +1,4 @@
-﻿using System.Data.Common;
-using System.Globalization;
+﻿using System.Globalization;
 using Microsoft.EntityFrameworkCore;
 using MySite.API.Data;
 using MySite.API.Data.Entities;
@@ -43,7 +42,7 @@ public static class LikedTweetsRoutes
                 .Select(x => new LikedTweetDto
                 {
                     TweetLink = $"{TwitterUrl}{x.TweetLink}",
-                    Screenshot = File.ReadAllBytes(x.ScreenshotPath),
+                    Screenshot = string.IsNullOrEmpty(x.ScreenshotPath) ? null : File.ReadAllBytes(x.ScreenshotPath),
                     LikedDate = x.LikedDate
                 })
                 .ToListAsync();
@@ -61,7 +60,7 @@ public static class LikedTweetsRoutes
                 .Select(x => new LikedTweetDto
                 {
                     TweetLink = $"{TwitterUrl}{x.TweetLink}",
-                    Screenshot = File.ReadAllBytes(x.ScreenshotPath),
+                    Screenshot = string.IsNullOrEmpty(x.ScreenshotPath) ? null : File.ReadAllBytes(x.ScreenshotPath),
                     LikedDate = x.LikedDate
                 })
                 .ToListAsync();
@@ -81,7 +80,7 @@ public static class LikedTweetsRoutes
                 .Select(x => new LikedTweetDto
                 {
                     TweetLink = $"{TwitterUrl}{x.TweetLink}",
-                    Screenshot = File.ReadAllBytes(x.ScreenshotPath),
+                    Screenshot = string.IsNullOrEmpty(x.ScreenshotPath) ? null : File.ReadAllBytes(x.ScreenshotPath),
                     LikedDate = x.LikedDate
                 })
                 .FirstOrDefaultAsync();
