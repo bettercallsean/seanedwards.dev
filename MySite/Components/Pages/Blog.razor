@@ -1,4 +1,5 @@
 ﻿@page "/blog"
+@page "/blog/page/{PageNumber}"
 @using Markdig
 @using MySite.Services.Interfaces
 @using MySite.Shared.Dtos
@@ -20,23 +21,40 @@ else
 }
 
 @code {
+    [Parameter]
+    public int? PageNumber { get; set; } 
+
     private List<string>? BlogPostUrls { get; set; }
 
-    private static int PageNumber { get; set; } = 1;
+    private int BlogPostsCount { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
+        if (PageNumber == null) 
+            PageNumber = 1;
         await Task.Delay(1);
 
+        await LoadBlogPostsAsync();
+    }
+
+    private async Task LoadBlogPostsAsync()
+    {
         var blogPostUrls = await GetAllBlogPostUrlSlugsAsync();
 
         if (blogPostUrls is null) return;
 
         BlogPostUrls = blogPostUrls;
+
+        BlogPostsCount = await GetBlogPostsCountAsync();
+    }
+
+    private async Task<int> GetBlogPostsCountAsync()
+    {
+        return await blogService.GetBlogPostsCountAsync();
     }
 
     private async Task<List<string>?> GetAllBlogPostUrlSlugsAsync()
     {
-        return await blogService.GetAllBlogPostUrlSlugsAsync(PageNumber);
+        return await blogService.GetAllBlogPostUrlSlugsAsync(PageNumber.Value);
     }
 }

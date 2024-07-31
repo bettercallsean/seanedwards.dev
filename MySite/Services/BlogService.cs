@@ -25,4 +25,10 @@ public class BlogService(HttpClient httpClient, ILogger<BlogService> logger) : I
         logger.LogInformation("Getting blog post {Slug}", urlSlug);
         return await httpClient.GetFromJsonAsync<BlogPostDto>($"{BaseUri}/{urlSlug}");
     }
+
+    public async Task<int> GetBlogPostsCountAsync()
+    {
+        logger.LogInformation("Getting blog post count");
+        return await httpClient.GetFromJsonAsync<int>($"{BaseUri}/count");
+    }
 }

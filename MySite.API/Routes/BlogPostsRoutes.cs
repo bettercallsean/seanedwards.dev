@@ -43,6 +43,15 @@ public static class BlogPostsRoutes
         .WithName("GetAllBlogPostsSlugs")
         .WithOpenApi();
 
+        app.MapGet("/blogposts/count", async (MySiteDbContext dbContext) =>
+        {
+            return await dbContext.BlogPosts
+                .AsNoTracking()
+                .CountAsync();
+        })
+        .WithName("GetBlogPostsCount")
+        .WithOpenApi();
+
         app.MapGet("/blogposts/{urlSlug}", async (string urlSlug, MySiteDbContext dbContext) =>
         {
             return await dbContext.BlogPosts
