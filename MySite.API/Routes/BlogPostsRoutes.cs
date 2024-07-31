@@ -30,6 +30,19 @@ public static class BlogPostsRoutes
         .WithName("GetAllBlogPosts")
         .WithOpenApi();
 
+        app.MapGet("/blogposts/slugs", async ([AsParameters] GetAllParameters parameters, MySiteDbContext dbContext) =>
+        {
+            return await dbContext.BlogPosts
+                .AsNoTracking()
+                .OrderByDescending(x => x.Id)
+                .Skip((parameters.PageNumber - 1) * parameters.PageSize)
+                .Take(parameters.PageSize)
+                .Select(x => x.UrlSlug)
+                .ToListAsync();
+        })
+        .WithName("GetAllBlogPostsSlugs")
+        .WithOpenApi();
+
         app.MapGet("/blogposts/{urlSlug}", async (string urlSlug, MySiteDbContext dbContext) =>
         {
             return await dbContext.BlogPosts

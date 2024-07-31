@@ -6,22 +6,21 @@
 @inject IBlogService blogService
 @inject IMapper mapper
 
-@if (BlogPosts is null)
+@if (BlogPostUrls is null)
 {
     <h1>Loading...</h1>
 }
 else
 {
-    @foreach (var post in BlogPosts)
+    @foreach (var slug in BlogPostUrls)
     {
-        <BlogPost Slug="@post.UrlSlug" />
+        <BlogPost Slug="@slug" />
         <hr />
     }
-    
 }
 
 @code {
-    private List<Models.BlogPost>? BlogPosts { get; set; }
+    private List<string>? BlogPostUrls { get; set; }
 
     private static int PageNumber { get; set; } = 1;
 
@@ -29,15 +28,15 @@ else
     {
         await Task.Delay(1);
 
-        var dto = await GetAllBlogPostsAsync();
+        var blogPostUrls = await GetAllBlogPostUrlSlugsAsync();
 
-        if (dto is null) return;
+        if (blogPostUrls is null) return;
 
-        BlogPosts = mapper.Map<List<Models.BlogPost>>(dto);
+        BlogPostUrls = blogPostUrls;
     }
 
-    private async Task<List<BlogPostDto>?> GetAllBlogPostsAsync()
+    private async Task<List<string>?> GetAllBlogPostUrlSlugsAsync()
     {
-        return await blogService.GetAllBlogPostsAsync(PageNumber);
+        return await blogService.GetAllBlogPostUrlSlugsAsync(PageNumber);
     }
 }
