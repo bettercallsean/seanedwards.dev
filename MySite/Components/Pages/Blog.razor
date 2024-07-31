@@ -12,17 +12,12 @@
 }
 else
 {
-    <div class="container">
     @foreach (var post in BlogPosts)
-        {
-            <div class="blog-post">
-                <h4>@post.Title</h4>
-                <h5>@post.PostedDate.ToString("f")</h5>
-                @((MarkupString)Markdown.ToHtml(post.Content.Substring(0, 100)))
-            </div>
-            <a href="/blog/@post.UrlSlug" class="read-more">Read more</a>
-        }
-    </div>
+    {
+        <BlogPost Slug="@post.UrlSlug" />
+        <hr />
+    }
+    
 }
 
 @code {

@@ -50,11 +50,13 @@ public static class BlogPostsRoutes
 
         app.MapPost("/blogposts", async (BlogPostDto dto, ISlugHelper slugHelper, MySiteDbContext dbContext) =>
         {
+            if (dto.Title is null || dto.Content is null || dto.PostedDate == null) return false;
+
             await dbContext.BlogPosts.AddAsync(new BlogPost
             {
                 Title = dto.Title,
                 UrlSlug = slugHelper.GenerateSlug(dto.Title),
-                PostedDate = dto.PostedDate,
+                PostedDate = dto.PostedDate.Value,
                 Content = dto.Content
             });
 

@@ -1,7 +1,4 @@
-﻿.blog-post p {
-    text-align: left;
-}
-
-read-more {
-    color: blue;
+﻿hr {
+    margin: 25px auto;
+    width: 50%;
 }

@@ -1,0 +1,20 @@
+﻿.post-content {
+    text-align: left;
+}
+
+::deep p img {
+    display: block;
+    margin: auto;
+    max-width: 100%;
+    height: auto;
+}
+
+.post-header {
+    background-color: black;
+    color: white;
+}
+
+    .post-header h2 {
+        font-weight: bold;
+        font-size: 55px
+    }

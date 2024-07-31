@@ -7,6 +7,7 @@
 @inject IMapper mapper
 @inject NavigationManager navigationManager
 
+
 @if (Post is null)
 {
     <h1>Loading...</h1>
@@ -14,12 +15,20 @@
 else
 {
     <div class="container">
-    <div class="blog-post">
-        <h4>@Post.Title</h4>
-        <h5>@Post.PostedDate.ToString("f")</h5>
-        @((MarkupString)Markdown.ToHtml(Post.Content))
+        <div class="blog-post">
+            <a href="/blog/@Post.UrlSlug">
+                <div class="post-header" title="@Post.PostedDate.ToString("f")">
+                    <h2>@Post.Title</h2>
+                    <h5>@Post.PostedDate.ToString("D")</h5>
+                </div>
+            </a>
+
+            <div class="post-content">
+                @((MarkupString)Markdown.ToHtml(Post.Content))
+            </div>
+        </div>
     </div>
-</div>
+    
 }
 
 @code {
