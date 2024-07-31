@@ -3,6 +3,7 @@ using MySite.API.Data;
 using MySite.API.Data.Entities;
 using MySite.Shared.Dtos;
 using MySite.Shared.RouteParameters;
+using Slugify;
 
 namespace MySite.API.Routes;
 
@@ -20,6 +21,7 @@ public static class BlogPostsRoutes
                 .Select(x => new BlogPostDto
                 {
                     Title = x.Title,
+                    UrlSlug = x.UrlSlug,
                     PostedDate = x.PostedDate,
                     Content = x.Content
                 })
@@ -28,11 +30,30 @@ public static class BlogPostsRoutes
         .WithName("GetAllBlogPosts")
         .WithOpenApi();
 
-        app.MapPost("/blogposts", async (BlogPostDto dto, MySiteDbContext dbContext) =>
+        app.MapGet("/blogposts/{urlSlug}", async (string urlSlug, MySiteDbContext dbContext) =>
+        {
+            return await dbContext.BlogPosts
+                .AsNoTracking()
+                .OrderBy(x => x.Id)
+                .Where(x => x.UrlSlug == urlSlug)
+                .Select(x => new BlogPostDto
+                {
+                    Title = x.Title,
+                    UrlSlug = x.UrlSlug,
+                    PostedDate = x.PostedDate,
+                    Content = x.Content
+                })
+                .FirstOrDefaultAsync();
+        })
+        .WithName("GetBlogPost")
+        .WithOpenApi();
+
+        app.MapPost("/blogposts", async (BlogPostDto dto, ISlugHelper slugHelper, MySiteDbContext dbContext) =>
         {
             await dbContext.BlogPosts.AddAsync(new BlogPost
             {
                 Title = dto.Title,
+                UrlSlug = slugHelper.GenerateSlug(dto.Title),
                 PostedDate = dto.PostedDate,
                 Content = dto.Content
             });

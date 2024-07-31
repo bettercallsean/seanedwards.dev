@@ -1,3 +1,7 @@
 ﻿.blog-post p {
     text-align: left;
 }
+
+read-more {
+    color: blue;
+}

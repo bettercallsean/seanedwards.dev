@@ -1,0 +1,46 @@
+﻿@page "/blog/{slug}"
+@using Markdig
+@using MySite.Services
+@using MySite.Shared.Dtos
+@inject IBlogService blogService
+@inject NavigationManager navigationManager
+
+@if (Post is null)
+{
+    <h1>Loading...</h1>
+}
+else
+{
+    <div class="container">
+        <div class="blog-post">
+            <h4>@Post.Title</h4>
+            <h5>@Post.PostedDate.ToString("f")</h5>
+            @((MarkupString)Markdown.ToHtml(Post.Content))
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string? Slug { get; set; }
+
+    private BlogPostDto? Post { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Slug is null)
+        {
+            NavigateToBlogOverview();
+            return;
+        }
+
+        Post = await blogService.GetBlogPostAsync(Slug);
+
+        if (Post is null) NavigateToBlogOverview();
+    }
+
+    private void NavigateToBlogOverview()
+    {
+        navigationManager.NavigateTo("/blog");
+    }
+}

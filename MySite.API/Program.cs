@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using MySite.API;
 using MySite.API.Data;
 using MySite.API.Routes;
+using Slugify;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +15,7 @@ builder.Services.AddSwaggerGen();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<MySiteDbContext>(
     options => options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+builder.Services.AddSingleton<ISlugHelper, SlugHelper>();
 
 var app = builder.Build();
 
