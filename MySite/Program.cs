@@ -23,6 +23,7 @@ builder.Services.AddSingleton(x => new HttpClient
 builder.Services.AddAutoMapper(config =>
 {
     config.AddProfile<LikedTweetProfile>();
+    config.AddProfile<BlogProfile>();
 });
 
 builder.Services.AddHttpLogging(config =>

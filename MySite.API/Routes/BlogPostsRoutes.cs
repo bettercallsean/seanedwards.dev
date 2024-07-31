@@ -15,7 +15,7 @@ public static class BlogPostsRoutes
         {
             return await dbContext.BlogPosts
                 .AsNoTracking()
-                .OrderBy(x => x.Id)
+                .OrderByDescending(x => x.Id)
                 .Skip((parameters.PageNumber - 1) * parameters.PageSize)
                 .Take(parameters.PageSize)
                 .Select(x => new BlogPostDto
