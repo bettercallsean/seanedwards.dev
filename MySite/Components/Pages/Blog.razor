@@ -1,8 +1,10 @@
 ﻿@page "/blog"
 @using Markdig
-@using MySite.Services
+@using MySite.Services.Interfaces
 @using MySite.Shared.Dtos
+@using global::AutoMapper
 @inject IBlogService blogService
+@inject IMapper mapper
 
 @if (BlogPosts is null)
 {
@@ -11,7 +13,7 @@
 else
 {
     <div class="container">
-        @foreach (var post in BlogPosts)
+    @foreach (var post in BlogPosts)
         {
             <div class="blog-post">
                 <h4>@post.Title</h4>
@@ -24,17 +26,23 @@ else
 }
 
 @code {
-    private List<BlogPostDto>? BlogPosts { get; set; }
+    private List<Models.BlogPost>? BlogPosts { get; set; }
+
+    private static int PageNumber { get; set; } = 1;
 
     protected override async Task OnInitializedAsync()
     {
         await Task.Delay(1);
 
-        BlogPosts = await GetAllBlogPostsAsync();
+        var dto = await GetAllBlogPostsAsync();
+
+        if (dto is null) return;
+
+        BlogPosts = mapper.Map<List<Models.BlogPost>>(dto);
     }
 
-    private async Task<List<BlogPostDto>> GetAllBlogPostsAsync()
+    private async Task<List<BlogPostDto>?> GetAllBlogPostsAsync()
     {
-        return await blogService.GetAllBlogPostsAsync();
+        return await blogService.GetAllBlogPostsAsync(PageNumber);
     }
 }

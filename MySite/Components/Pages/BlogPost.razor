@@ -1,6 +1,6 @@
 ﻿@page "/blog/{slug}"
 @using Markdig
-@using MySite.Services
+@using MySite.Services.Interfaces
 @using MySite.Shared.Dtos
 @using global::AutoMapper
 @inject IBlogService blogService
@@ -14,12 +14,12 @@
 else
 {
     <div class="container">
-        <div class="blog-post">
-            <h4>@Post.Title</h4>
-            <h5>@Post.PostedDate.ToString("f")</h5>
-            @((MarkupString)Markdown.ToHtml(Post.Content))
-        </div>
+    <div class="blog-post">
+        <h4>@Post.Title</h4>
+        <h5>@Post.PostedDate.ToString("f")</h5>
+        @((MarkupString)Markdown.ToHtml(Post.Content))
     </div>
+</div>
 }
 
 @code {

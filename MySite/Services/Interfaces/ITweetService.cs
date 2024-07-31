@@ -1,6 +1,6 @@
 using MySite.Shared.Dtos;
 
-namespace MySite.Services;
+namespace MySite.Services.Interfaces;
 
 public interface ITweetService
 {

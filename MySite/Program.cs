@@ -1,6 +1,7 @@
 using MySite.AutoMapper;
 using MySite.Components;
 using MySite.Services;
+using MySite.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 

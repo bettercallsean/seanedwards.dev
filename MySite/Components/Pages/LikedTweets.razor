@@ -1,9 +1,9 @@
 ﻿@page "/likedtweets"
 @page "/likedtweets/{date}"
 @using System.Globalization
+@using MySite.Services.Interfaces
 @using global::AutoMapper
 @using MySite.Models
-@using MySite.Services
 @inject ITweetService tweetService
 @inject IMapper mapper
 @inject NavigationManager navigationManager
@@ -17,45 +17,47 @@ else
 {
     if (DateIsInTheFuture)
     {
-        <FutureTweets FutureDate="@TweetsDate"/>
+        <FutureTweets FutureDate="@TweetsDate" />
     }
     else
     {
         <div class="container">
-            <div class="row align-items-center date-navigator">
-                <a class="btn btn-primary col-sm" href="/likedtweets/@TweetsDate.Date.AddDays(1).ToString("dd-MM-yyyy")" style="visibility: @(TweetsDate != DateTime.Today ? "visible" : "hidden")">
-                        @(TweetsDate == DateTime.Today.AddDays(-1)
+    <div class="row align-items-center date-navigator">
+        <a class="btn btn-primary col-sm" href="/likedtweets/@TweetsDate.Date.AddDays(1).ToString("dd-MM-yyyy")"
+            style="visibility: @(TweetsDate != DateTime.Today ? "visible" : "hidden")">
+            @(TweetsDate == DateTime.Today.AddDays(-1)
                         ? "Today"
                         : TweetsDate.Date.AddDays(1).ToString(TweetsDate.Year == DateTime.Today.Year
-                            ? "dddd d MMMM"
-                            : "dddd d MMMM yyyy"))
+                        ? "dddd d MMMM"
+                        : "dddd d MMMM yyyy"))
                 </a>
 
                 <h3 class="col">@PageTitle</h3>
 
-                <a class="btn btn-primary col-sm" href="/likedtweets/@TweetsDate.Date.AddDays(-1).ToString("dd-MM-yyyy")" style="visibility: @(EarliestTweet is not null && EarliestTweet.LikedDate != TweetsDate ? "visible" : "hidden")">
-                        @(TweetsDate == DateTime.Today
+                <a class="btn btn-primary col-sm" href="/likedtweets/@TweetsDate.Date.AddDays(-1).ToString("dd-MM-yyyy")"
+                    style="visibility: @(EarliestTweet is not null && EarliestTweet.LikedDate != TweetsDate ? "visible" : "hidden")">
+                    @(TweetsDate == DateTime.Today
                         ? "Yesterday"
                         : TweetsDate.Date.AddDays(-1).ToString(TweetsDate.Year == DateTime.Today.Year
-                            ? "dddd d MMMM"
-                            : "dddd d MMMM yyyy"))
+                        ? "dddd d MMMM"
+                        : "dddd d MMMM yyyy"))
                 </a>
 
             </div>
             @if (Tweets?.Count > 0)
             {
                 <div class="d-flex flex-column align-items-center">
-                @foreach (var tweet in Tweets)
-                {
-                    <div class="tweet">
-                        <a href="@tweet.TweetLink" target="_blank">
-                            <img src="@tweet.Base64TweetScreenshot"/>
-                        </a>
-                        <a href="@tweet.TweetLink" target="_blank">
-                            <p>@tweet.TweetLink</p>
-                        </a>
-                    </div>
-                }
+                    @foreach (var tweet in Tweets)
+                    {
+                        <div class="tweet">
+                            <a href="@tweet.TweetLink" target="_blank">
+                                <img src="@tweet.Base64TweetScreenshot" />
+                            </a>
+                            <a href="@tweet.TweetLink" target="_blank">
+                                <p>@tweet.TweetLink</p>
+                            </a>
+                        </div>
+                    }
                 </div>
             }
             else
@@ -113,7 +115,8 @@ else
 
     private void ParseDateParameter()
     {
-        var validDate = DateTime.TryParseExact(Date, "dd-MM-yyyy", CultureInfo.CurrentCulture, DateTimeStyles.None, out var tweetDate);
+        var validDate = DateTime.TryParseExact(Date, "dd-MM-yyyy", CultureInfo.CurrentCulture, DateTimeStyles.None, out var
+        tweetDate);
 
         if (validDate)
         {
@@ -149,8 +152,8 @@ else
         else
         {
             PageTitle = TweetsDate.ToString(TweetsDate.Year == DateTime.Today.Year
-                ? "dddd d MMMM"
-                : "dddd d MMMM yyyy");
+            ? "dddd d MMMM"
+            : "dddd d MMMM yyyy");
         }
     }
 
