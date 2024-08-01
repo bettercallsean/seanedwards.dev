@@ -10,11 +10,11 @@
 }
 
 .post-header {
-    background-color: black;
+    background-color: seagreen;
     color: white;
 }
 
     .post-header h2 {
         font-weight: bold;
-        font-size: 55px
+        font-size: 55px;
     }
