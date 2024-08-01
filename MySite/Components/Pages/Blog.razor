@@ -22,14 +22,15 @@ else
     <div class="container">
         <div class="row button-row">
             <div class="col d-flex justify-content-start">
-                <a class="btn btn-primary" style="visibility: @(PageNumber > 1 ? "visible" : "hidden")" href="/blog/page/@(PageNumber - 1)">Newer posts</a>
+                <a class="btn btn-primary" style="visibility: @(PageNumber > 1 ? "visible" : "hidden")" href="/blog/page/@(PageNumber - 1)" data-enhance-nav="false">Newer posts</a>
             </div>
+            
             <div class="col">
             </div>
-            <div class="col d-flex justify-content-end">
-                <a class="btn btn-primary" style="visibility: @(PageNumber < Math.Round((double)BlogPostsCount / 5, MidpointRounding.ToPositiveInfinity) ? "visible" : "hidden")" href="/blog/page/@(PageNumber + 1)">Older posts</a>
-            </div>
 
+            <div class="col d-flex justify-content-end">
+                <a class="btn btn-primary" style="visibility: @(PageNumber < Math.Round((double)BlogPostsCount / 5, MidpointRounding.ToPositiveInfinity) ? "visible" : "hidden")" href="/blog/page/@(PageNumber + 1)" data-enhance-nav="false">Older posts</a>
+            </div>
         </div>
     </div>
 }
