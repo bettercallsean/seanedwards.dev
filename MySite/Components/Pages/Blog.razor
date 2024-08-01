@@ -1,5 +1,5 @@
 ﻿@page "/blog"
-@page "/blog/page/{PageNumber:int?}"
+@page "/blog/page/{PageNumber:int}"
 @using Markdig
 @using MySite.Services.Interfaces
 @using MySite.Shared.Dtos
@@ -22,12 +22,12 @@ else
     <div class="container">
         <div class="row button-row">
             <div class="col d-flex justify-content-start">
-                <a class="btn btn-primary" style="visibility: @(PageNumber > 1 ? "visible" : "hidden")" href="/blog/page/@(PageNumber-1)">Newer posts</a>
+                <a class="btn btn-primary" style="visibility: @(PageNumber > 1 ? "visible" : "hidden")" href="/blog/page/@(PageNumber - 1)">Newer posts</a>
             </div>
             <div class="col">
             </div>
             <div class="col d-flex justify-content-end">
-                <a class="btn btn-primary" style="visibility: @(PageNumber < Math.Round((double)BlogPostsCount / 5, MidpointRounding.ToPositiveInfinity) ? "visible" : "hidden")" href="/blog/page/@(PageNumber+1)">Older posts</a>
+                <a class="btn btn-primary" style="visibility: @(PageNumber < Math.Round((double)BlogPostsCount / 5, MidpointRounding.ToPositiveInfinity) ? "visible" : "hidden")" href="/blog/page/@(PageNumber + 1)">Older posts</a>
             </div>
 
         </div>
@@ -36,16 +36,28 @@ else
 
 @code {
     [Parameter]
-    public int PageNumber { get; set; } = 1; 
+    public int PageNumber { get; set; }
 
     private List<string>? BlogPostUrls { get; set; }
 
-    private int BlogPostsCount { get; set; }
+    private static int BlogPostsCount { get; set; }
 
+    private static int TotalNumberOfPages => (int)Math.Round((double)BlogPostsCount / 5, MidpointRounding.ToPositiveInfinity);
+
+    protected async override Task OnInitializedAsync()
+    {
+        PageNumber = PageNumber == 0 ? 1 : PageNumber;
+
+        BlogPostsCount = await GetBlogPostsCountAsync();
+    }
 
     protected async override Task OnParametersSetAsync()
     {
-        PageNumber = PageNumber == 0 ?  1 : PageNumber;
+        if (PageNumber <= 0 || PageNumber > TotalNumberOfPages)
+        {
+            navigationManager.NavigateTo("/blog");
+            return;
+        }
 
         await Task.Delay(1);
 
@@ -58,10 +70,7 @@ else
 
         if (blogPostUrls is null) return;
 
-        BlogPostsCount = await GetBlogPostsCountAsync();
-
         BlogPostUrls = blogPostUrls;
-
     }
 
     private async Task<int> GetBlogPostsCountAsync()
@@ -72,10 +81,5 @@ else
     private async Task<List<string>?> GetAllBlogPostUrlSlugsAsync()
     {
         return await blogService.GetAllBlogPostUrlSlugsAsync(PageNumber);
-    }
-
-    private void NavigateToNextPage(int? pageNumber)
-    {
-        navigationManager.NavigateTo($"/blog/page/{pageNumber}");
     }
 }
