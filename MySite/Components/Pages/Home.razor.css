@@ -20,9 +20,7 @@ a#dissertation-link:hover{
 
 .description {
     margin-top: 4%;
+    padding: 2%;
     font-size: 20px;
-    margin-bottom: 2%;
     background-color: var(--light-coral);
-    /* border-width: 100px solid black; */
-
 }
