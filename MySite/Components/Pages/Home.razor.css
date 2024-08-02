@@ -1,10 +1,10 @@
-a#dissertation-link{
+/* a#dissertation-link{
     color: rgb(0, 153, 255);
 }
 
 a#dissertation-link:hover{
     color: rgb(103, 199, 255);
-}
+} */
 
 .aboutme {
     padding-top: 2%;
@@ -13,11 +13,16 @@ a#dissertation-link:hover{
 .mugshot {
     border-radius: 100%;
     width: auto;
+    /* background-color: #9ee493ff; */
+    background-color: var(--lavender-web);
+
 }
 
 .description {
-    padding-top: 4%;
+    margin-top: 4%;
     font-size: 20px;
-    color: rgb(77, 77, 77);
     margin-bottom: 2%;
+    background-color: var(--light-coral);
+    /* border-width: 100px solid black; */
+
 }
