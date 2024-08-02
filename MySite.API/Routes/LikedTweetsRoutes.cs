@@ -42,7 +42,7 @@ public static class LikedTweetsRoutes
                 .Select(x => new LikedTweetDto
                 {
                     TweetLink = $"{TwitterUrl}{x.TweetLink}",
-                    Screenshot = File.ReadAllBytes(x.ScreenshotPath),
+                    Screenshot = string.IsNullOrEmpty(x.ScreenshotPath) ? null : File.ReadAllBytes(x.ScreenshotPath),
                     LikedDate = x.LikedDate
                 })
                 .ToListAsync();
@@ -60,7 +60,7 @@ public static class LikedTweetsRoutes
                 .Select(x => new LikedTweetDto
                 {
                     TweetLink = $"{TwitterUrl}{x.TweetLink}",
-                    Screenshot = File.ReadAllBytes(x.ScreenshotPath),
+                    Screenshot = string.IsNullOrEmpty(x.ScreenshotPath) ? null : File.ReadAllBytes(x.ScreenshotPath),
                     LikedDate = x.LikedDate
                 })
                 .ToListAsync();
@@ -80,7 +80,7 @@ public static class LikedTweetsRoutes
                 .Select(x => new LikedTweetDto
                 {
                     TweetLink = $"{TwitterUrl}{x.TweetLink}",
-                    Screenshot = File.ReadAllBytes(x.ScreenshotPath),
+                    Screenshot = string.IsNullOrEmpty(x.ScreenshotPath) ? null : File.ReadAllBytes(x.ScreenshotPath),
                     LikedDate = x.LikedDate
                 })
                 .FirstOrDefaultAsync();
