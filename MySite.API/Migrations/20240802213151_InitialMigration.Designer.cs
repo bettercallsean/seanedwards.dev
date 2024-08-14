@@ -12,7 +12,7 @@ using MySite.API.Data;
 namespace MySite.API.Migrations
 {
     [DbContext(typeof(MySiteDbContext))]
-    [Migration("20240730173525_InitialMigration")]
+    [Migration("20240802213151_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -24,30 +24,6 @@ namespace MySite.API.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
-
-            modelBuilder.Entity("MySite.API.Data.Entities.BlogPost", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("PostedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("BlogPosts");
-                });
 
             modelBuilder.Entity("MySite.API.Data.Entities.LikedTweet", b =>
                 {
