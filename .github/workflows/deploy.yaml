@@ -1,0 +1,90 @@
+name: Deploy bot and API
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  build-bot:
+    runs-on: ubuntu-latest
+    env:
+      working-directory: MySite/MySite
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore dependencies
+        working-directory: ${{ env.working-directory }}
+        run: dotnet restore
+
+      - name: Build
+        working-directory: ${{ env.working-directory }}
+        run: dotnet publish /t:PublishContainer -c Release --os linux --arch x64
+
+      - name: Log into Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.DOCKER_REGISTRY }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Tag container
+        working-directory: ${{ env.working-directory }}
+        run: docker tag mysite ${{ secrets.DOCKER_REGISTRY }}/mysite
+
+      - name: Push the image to Docker Hub
+        working-directory: ${{ env.working-directory }}
+        run: docker push ${{ secrets.DOCKER_REGISTRY }}/mysite
+
+  build-api:
+    runs-on: ubuntu-latest
+    env:
+      working-directory: MySite/MySite.API
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore dependencies
+        working-directory: ${{ env.working-directory }}
+        run: dotnet restore
+
+      - name: Build
+        working-directory: ${{ env.working-directory }}
+        run: dotnet publish /t:PublishContainer -c Release --os linux --arch x64
+
+      - name: Log into Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.DOCKER_REGISTRY }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Tag container
+        working-directory: ${{ env.working-directory }}
+        run: docker tag mysite-api ${{ secrets.DOCKER_REGISTRY }}/mysite-api
+
+      - name: Push the image to Docker Hub
+        working-directory: ${{ env.working-directory }}
+        run: docker push ${{ secrets.DOCKER_REGISTRY }}/mysite-api
+
+  start-containers:
+    runs-on: ubuntu-latest
+    needs: [build-bot, build-api]
+    steps:
+      - name: Pull the image to VM
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          script: cd ${{ secrets.PROJECT_DIRECTORY }} && docker compose pull && docker compose up -d
