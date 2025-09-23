@@ -1,4 +1,4 @@
-name: Deploy bot and API
+name: Deploy site and API
 
 on:
   push:
@@ -8,7 +8,7 @@ jobs:
   build-bot:
     runs-on: ubuntu-latest
     env:
-      working-directory: MySite/MySite
+      working-directory: MySite
     steps:
       - uses: actions/checkout@v4
 
@@ -43,7 +43,7 @@ jobs:
   build-api:
     runs-on: ubuntu-latest
     env:
-      working-directory: MySite/MySite.API
+      working-directory: MySite.API
     steps:
       - uses: actions/checkout@v4
 
