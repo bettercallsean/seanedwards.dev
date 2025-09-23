@@ -6,13 +6,13 @@ public class TweetService(HttpClient httpClient, ILogger<TweetService> logger) :
 {
     private const string BaseUri = "/likedtweets";
 
-    public async Task<List<LikedTweetDto>?> GetLikedTweetsAsync()
+    public async Task<List<LikedTweetDto>> GetLikedTweetsAsync()
     {
         logger.LogInformation("Getting all liked tweets");
         return await httpClient.GetFromJsonAsync<List<LikedTweetDto>>($"{BaseUri}");
     }
 
-    public async Task<List<LikedTweetDto>?> GetLikedTweetsAsync(DateTime tweetDate)
+    public async Task<List<LikedTweetDto>> GetLikedTweetsAsync(DateTime tweetDate)
     {
         logger.LogInformation("Getting liked tweets for {Date:d}", tweetDate);
         try
@@ -26,7 +26,7 @@ public class TweetService(HttpClient httpClient, ILogger<TweetService> logger) :
         }
     }
 
-    public async Task<LikedTweetDto?> GetEarliestLikedTweetAsync()
+    public async Task<LikedTweetDto> GetEarliestLikedTweetAsync()
     {
         logger.LogInformation("Getting earliest tweet");
         return await httpClient.GetFromJsonAsync<LikedTweetDto>($"{BaseUri}/earliest");
