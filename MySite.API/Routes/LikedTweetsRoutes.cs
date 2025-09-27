@@ -54,6 +54,8 @@ public static class LikedTweetsRoutes
         {
             if (!DateTime.TryParseExact(dateString, "dd-MM-yyyy", CultureInfo.CurrentCulture, DateTimeStyles.None, out var date)) return null;
 
+            date = date.ToUniversalTime();
+
             var tweets = await dbContext.LikedTweets
                 .AsNoTracking()
                 .Where(x => x.LikedDate == date)
@@ -79,8 +81,6 @@ public static class LikedTweetsRoutes
                 .AsNoTracking()
                 .Select(x => new LikedTweetDto
                 {
-                    TweetLink = $"{TwitterUrl}{x.TweetLink}",
-                    Screenshot = string.IsNullOrEmpty(x.ScreenshotPath) ? null : File.ReadAllBytes(x.ScreenshotPath),
                     LikedDate = x.LikedDate
                 })
                 .FirstOrDefaultAsync();
