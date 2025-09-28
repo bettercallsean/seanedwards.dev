@@ -83,6 +83,7 @@ public static class LikedTweetsRoutes
                 {
                     LikedDate = x.LikedDate
                 })
+                .OrderBy(x => x.LikedDate)
                 .FirstOrDefaultAsync();
         })
         .WithName("GetEarliestLikedTweet")
