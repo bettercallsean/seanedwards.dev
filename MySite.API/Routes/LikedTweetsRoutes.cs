@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using MySite.API.Data;
 using MySite.API.Data.Entities;
 using MySite.Shared.Dtos;
+using MySite.Shared.Extensions;
 using MySite.Shared.RouteParameters;
 
 namespace MySite.API.Routes;
@@ -28,7 +29,7 @@ public static class LikedTweetsRoutes
                 {
                     TweetLink = item.Key,
                     ScreenshotPath = item.Value,
-                    LikedDate = dto.LikedDate.ToUniversalTime()
+                    LikedDate = dto.LikedDate.ToDateOnly()
                 })
                 .ToList();
 
@@ -60,7 +61,7 @@ public static class LikedTweetsRoutes
                 {
                     TweetLink = $"{TwitterUrl}{x.TweetLink}",
                     Screenshot = string.IsNullOrEmpty(x.ScreenshotPath) ? null : File.ReadAllBytes(x.ScreenshotPath),
-                    LikedDate = x.LikedDate
+                    LikedDate = x.LikedDate.ToDateTime(new TimeOnly(0, 0))
                 })
                 .ToListAsync();
         })
@@ -78,18 +79,16 @@ public static class LikedTweetsRoutes
                     return null;
                 }
 
-                date = date.ToUniversalTime();
-
                 logger.LogInformation("Getting liked tweets for {Date}", dateString);
 
                 var tweets = await dbContext.LikedTweets
                     .AsNoTracking()
-                    .Where(x => x.LikedDate.Date == date.Date)
+                    .Where(x => x.LikedDate == date.ToDateOnly())
                     .Select(x => new LikedTweetDto
                     {
                         TweetLink = $"{TwitterUrl}{x.TweetLink}",
-                        Screenshot = string.IsNullOrEmpty(x.ScreenshotPath) ? null : File.ReadAllBytes(x.ScreenshotPath),
-                        LikedDate = x.LikedDate
+                        //Screenshot = string.IsNullOrEmpty(x.ScreenshotPath) ? null : File.ReadAllBytes(x.ScreenshotPath),
+                        LikedDate = x.LikedDate.ToDateTime(new TimeOnly(0, 0))
                     })
                     .ToListAsync();
 
@@ -119,7 +118,7 @@ public static class LikedTweetsRoutes
                 .AsNoTracking()
                 .Select(x => new LikedTweetDto
                 {
-                    LikedDate = x.LikedDate
+                    LikedDate = x.LikedDate.ToDateTime(new TimeOnly(0, 0))
                 })
                 .OrderBy(x => x.LikedDate)
                 .FirstOrDefaultAsync();
