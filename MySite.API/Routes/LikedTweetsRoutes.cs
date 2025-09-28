@@ -13,21 +13,38 @@ public static class LikedTweetsRoutes
 
     public static void MapLikedTweetsRoutes(this IEndpointRouteBuilder app)
     {
+        var logger = LoggerFactory.Create(config =>
+        {
+            config.AddConsole();
+        }).CreateLogger("MySite API");
+
         app.MapPost("/likedtweets", async (LikedTweetsDto dto, MySiteDbContext dbContext) =>
         {
-            var tweets = dto.Tweets.Select(item => new LikedTweet
+            logger.LogInformation("Storing {LikedTweetCount} liked tweets for {LikedTweetDate}", dto.Tweets.Count, dto.LikedDate);
+
+            try
             {
-                TweetLink = item.Key,
-                ScreenshotPath = item.Value,
-                LikedDate = dto.LikedDate.ToUniversalTime()
-            })
-            .ToList();
+                var tweets = dto.Tweets.Select(item => new LikedTweet
+                {
+                    TweetLink = item.Key,
+                    ScreenshotPath = item.Value,
+                    LikedDate = dto.LikedDate.ToUniversalTime()
+                })
+                .ToList();
 
-            tweets.Reverse();
+                tweets.Reverse();
 
-            await dbContext.LikedTweets.AddRangeAsync(tweets);
+                await dbContext.LikedTweets.AddRangeAsync(tweets);
 
-            return await dbContext.SaveChangesAsync() > 0;
+                return await dbContext.SaveChangesAsync() > 0;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to save {LikedTweetCount} liked tweets for {LikedTweetDate}", dto.Tweets.Count, dto.LikedDate);
+
+                return false;
+            }
+
         })
         .WithName("AddLikedTweets")
         .WithOpenApi();
@@ -52,24 +69,43 @@ public static class LikedTweetsRoutes
 
         app.MapGet("/likedtweets/{dateString}", async (string dateString, MySiteDbContext dbContext) =>
         {
-            if (!DateTime.TryParseExact(dateString, "dd-MM-yyyy", CultureInfo.CurrentCulture, DateTimeStyles.None, out var date)) return null;
-
-            date = date.ToUniversalTime();
-
-            var tweets = await dbContext.LikedTweets
-                .AsNoTracking()
-                .Where(x => x.LikedDate.Date == date.Date)
-                .Select(x => new LikedTweetDto
+            try
+            {
+                if (!DateTime.TryParseExact(dateString, "dd-MM-yyyy", CultureInfo.CurrentCulture, DateTimeStyles.None, out var date))
                 {
-                    TweetLink = $"{TwitterUrl}{x.TweetLink}",
-                    Screenshot = string.IsNullOrEmpty(x.ScreenshotPath) ? null : File.ReadAllBytes(x.ScreenshotPath),
-                    LikedDate = x.LikedDate
-                })
-                .ToListAsync();
+                    logger.LogWarning("Incorrect date string format passed in - {DateString}", dateString);
 
-            tweets.Reverse();
+                    return null;
+                }
 
-            return tweets;
+                date = date.ToUniversalTime();
+
+                logger.LogInformation("Getting liked tweets for {Date}", date);
+
+                var tweets = await dbContext.LikedTweets
+                    .AsNoTracking()
+                    .Where(x => x.LikedDate.Date == date.Date)
+                    .Select(x => new LikedTweetDto
+                    {
+                        TweetLink = $"{TwitterUrl}{x.TweetLink}",
+                        Screenshot = string.IsNullOrEmpty(x.ScreenshotPath) ? null : File.ReadAllBytes(x.ScreenshotPath),
+                        LikedDate = x.LikedDate
+                    })
+                    .ToListAsync();
+
+                tweets.Reverse();
+
+                logger.LogInformation("{LikedTweetCount} liked tweets found", tweets.Count);
+
+                return tweets;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to retrieve liked tweets for {DateString}", dateString);
+
+                return null;
+            }
+
         })
         .WithName("GetLikedTweetsOnDate")
         .WithOpenApi()
@@ -77,6 +113,8 @@ public static class LikedTweetsRoutes
 
         app.MapGet("/likedtweets/earliest", async (MySiteDbContext dbContext) =>
         {
+            logger.LogInformation("Getting earliest tweet date");
+
             return await dbContext.LikedTweets
                 .AsNoTracking()
                 .Select(x => new LikedTweetDto
