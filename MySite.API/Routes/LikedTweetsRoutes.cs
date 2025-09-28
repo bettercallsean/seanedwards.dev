@@ -80,7 +80,7 @@ public static class LikedTweetsRoutes
 
                 date = date.ToUniversalTime();
 
-                logger.LogInformation("Getting liked tweets for {Date}", date);
+                logger.LogInformation("Getting liked tweets for {Date}", dateString);
 
                 var tweets = await dbContext.LikedTweets
                     .AsNoTracking()
