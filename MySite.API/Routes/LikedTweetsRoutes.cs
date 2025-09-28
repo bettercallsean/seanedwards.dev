@@ -58,7 +58,7 @@ public static class LikedTweetsRoutes
 
             var tweets = await dbContext.LikedTweets
                 .AsNoTracking()
-                .Where(x => x.LikedDate == date)
+                .Where(x => x.LikedDate.Date == date.Date)
                 .Select(x => new LikedTweetDto
                 {
                     TweetLink = $"{TwitterUrl}{x.TweetLink}",
