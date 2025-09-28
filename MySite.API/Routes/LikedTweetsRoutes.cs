@@ -87,7 +87,7 @@ public static class LikedTweetsRoutes
                     .Select(x => new LikedTweetDto
                     {
                         TweetLink = $"{TwitterUrl}{x.TweetLink}",
-                        //Screenshot = string.IsNullOrEmpty(x.ScreenshotPath) ? null : File.ReadAllBytes(x.ScreenshotPath),
+                        Screenshot = string.IsNullOrEmpty(x.ScreenshotPath) ? null : File.ReadAllBytes(x.ScreenshotPath),
                         LikedDate = x.LikedDate.ToDateTime(new TimeOnly(0, 0))
                     })
                     .ToListAsync();
