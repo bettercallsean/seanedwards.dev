@@ -81,7 +81,7 @@ jobs:
     needs: [build-bot, build-api]
     steps:
       - name: Pull the image to VM
-        uses: appleboy/ssh-action@v1.2.2
+        uses: appleboy/ssh-action@v1.2.3
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
