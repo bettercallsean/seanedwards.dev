@@ -33,8 +33,6 @@ var app = builder.Build();
 
 app.UseHttpLogging();
 
-app.UseStaticFiles();
-
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
